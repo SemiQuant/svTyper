@@ -22,6 +22,31 @@ Program to find structural variants from Illumina sequencing.
 |     -dl\|--container      |      download the   singularity container to this path and exit (then run using 'singularity run   ~/wgs_pipeline_latest.sif')    |     NA         |     N           |   |
 |     -p\|--plots           |      dir_to_outputs make   plots of the 'Split_gene' function output                                                              |     NA         |     N           |   |
 
+## basic usage
+
+Get the singularity container
+```
+singularity pull library://semiquan7/default/sv_pipe:sha256.2acc92e69c1fb9e5b797fb3fe1561668a327307239d39509c1e5bfce51addae5
+```
+
+Get the script and reference files
+```
+git clone --recursive https://github.com/SemiQuant/svTyper.git
+```
+
+Run main
+```
+singularity run /path/to/container/sv_pipe.sif \
+  /path/to/script/sv_pipeline.sh \
+  --threads 4 \
+  --reference "/path/to/references/NC_000962.3.fasta" \
+  -read_dir "/path/to/reads/" \
+  --read_1 "/path/to/read_R1_001.fastq.gz" \
+  --read_2 "/path/to/read_R2_001.fastq.gz" \
+  --is_search \
+  --Ref_gbk "/path/to/references/NC_000962.3.gb" \
+  --is6110 "/path/to/references/IS6110.fasta" \
+```
 
 # Outputs
 
