@@ -10,7 +10,10 @@ Usage Options
   -c|--chr = reference name
   -s|--gene_str = main gene start (Default: 778990 [Rv0678])
   -e|--gene_send = main gene end (Default: 779487 [Rv0678])
-
+  -i|--is_search = search for IS6110 sequences?
+  -rg|--Ref_gbk = if --is_search then provide genome gbk
+  -is|--is6110 = if --is_search then provide IS6110 (or other) fasta
+  
 Single Use Options
   -dl|--container = download the singularity container to this path and exit (then run using 'singularity run ~/wgs_pipeline_latest.sif')
   -p|--plots = dir_to_outputs, make plots of the 'Split_gene' function output
@@ -69,6 +72,12 @@ declare_globals () {
           -is|--is6110)
           is6110="$2"
           ;;
+          -fr|--forward)
+          forward="$2"
+          ;;
+          -rr|--reverse)
+          reverse="$2"
+          ;;
       esac
         shift
     done
@@ -102,6 +111,8 @@ gene_end=${gene_end:-779487}
 chr=${chr:-"NC_000962.3"}
 ram=$(echo $threads*2 | bc)
 export PERL5LIB=/usr/local/bin/scalpel/
+forward=${forward:-"R1_001"}
+reverse=${reverse:-"R2_001"}
 
 bwa_map () {
   if [[ -e ${1}.btw ]]
@@ -262,9 +273,6 @@ gridss \
 
 
 
-
-
-
 if [[ ! -z $is_search ]]
 then      
   #IS6110 - this should ideally be done to the reference strain closes to the input
@@ -272,10 +280,10 @@ then
       --path "/usr/bin/IS_mapper/scripts/" \
       --reads "$R1" "$R2" \
       --queries "$is6110" --typingRef "$Ref_gbk" --runtype typing --output "${sample}.IS_6110" \
+      --forward "$forward" \
+      --reverse "$reverse" \
       --t $threads
       # --cutoff 5 --max_range 1.2 --max_clip 50 --log --bam
-      # --forward "_forward_paired" \
-      # --reverse "_reverse_paired" \
       
       mkdir "${Data}/IS6110"
       mv *IS6110* "${Data}/IS6110"
