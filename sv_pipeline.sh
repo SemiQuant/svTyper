@@ -21,6 +21,7 @@ Single Use Options
 TODO
   Add mask file (NC_000962.3.nonUniquelyMappable.bed) so we can ignore repetative regions and better detect SVs throught the genome
   Make a single use option for the 'Split_gene' function
+  Fix denovo for gridss
 "
 }
 
@@ -210,10 +211,10 @@ LargeSV_denovo () {
   scalpel-export --single --db "${6}/variants.db.dir" --bed "${7}.sv.bed" --ref "$3" \
     --variant-type "all" --max-ins-size 10000 --max-del-size 10000 --min-alt-count 10 \
     --min-del-size 3 --min-ins-size 3 \
-    --min-coverage 10 --min-vaf 0.2 > "${4}/${7}_lumpy_SVs.denovo.vcf"
+    --min-coverage 10 --min-vaf 0.2 > "${4}/${7}_${8}_SVs.denovo.vcf"
    # NOTE: The database.db file can be found in the output directory for the single operation
-   bgzip "${4}/${7}_lumpy_SVs.denovo.vcf"
-   tabix "${4}/${7}_lumpy_SVs.denovo.vcf.gz"
+   bgzip "${4}/${7}_${8}_SVs.denovo.vcf"
+   tabix "${4}/${7}_${8}_SVs.denovo.vcf.gz"
 }
 
 Split_gene () {
@@ -255,7 +256,7 @@ mkdir "$Temp"
 bwa_map "$Ref_name" "$R1" "$R2" "$sample" "$Data" $threads "$Temp"
 LargeSVs "$bam" "$Temp" "$sample" "$Data"
 Split_gene "$chr" $gene_start $gene_end "$sample" "$Data" "$Temp" "$bam"
-LargeSV_denovo "$bam" "${Data}/${sample}_lumpy_svtyper_SVs.vcf.gz" "$Ref_name" "$Data" $threads "$Temp" "$sample"
+LargeSV_denovo "$bam" "${Data}/${sample}_lumpy_svtyper_SVs.vcf.gz" "$Ref_name" "$Data" $threads "$Temp" "$sample" "lumpy"
 
 
 gridss \
@@ -271,6 +272,7 @@ gridss \
 # --blacklist <blacklist.bed>
 # --jar /usr/bin/gridss.jar
 
+# LargeSV_denovo "$bam" "${Data}/${sample}_gridss.vcf.gz" "$Ref_name" "$Data" $threads "$Temp" "$sample" "gridss"
 
 
 if [[ ! -z $is_search ]]
