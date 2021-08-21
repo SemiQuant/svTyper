@@ -26,7 +26,8 @@ Program to find structural variants from Illumina sequencing.
 
 Get the singularity container
 ```
-singularity pull library://semiquan7/default/sv_pipe:sha256.2acc92e69c1fb9e5b797fb3fe1561668a327307239d39509c1e5bfce51addae5
+singularity pull library://semiquan7/default/sv_pipe:latest
+# or singularity pull library://semiquan7/default/sv_pipe:sha256.5161aa04141b0616adbe021ec19d6905f67adfce12ab4adf8244535cdf50212e
 ```
 
 Get the script and reference files
