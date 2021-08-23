@@ -4,16 +4,25 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   stop("Please supply an input dir!", call.=FALSE)
 } else if (length(args)==1) {
-  require(plotly)
-  require(tidyverse)
+  require(plotly, quietly = T)
+  require(tidyverse, quietly = T)
   files <- list.files(args[1], pattern = "_splits.coverage.tsv", full.names = T, recursive = T)
   
+  # cov <- files %>%
+  #   map(read_tsv, col_names = F) %>%
+  #   reduce(rbind) %>% 
+  #   separate(X1, c("Isolate", "Reads"), sep = "_")
+  # colnames(cov)[3:5] <- c("CHR", "POS", "Cov")
+  
+  # above was problematic with sample nanimgs so
   cov <- files %>%
     map(read_tsv, col_names = F) %>%
     reduce(rbind) %>% 
-    separate(X1, c("Isolate", "Reads"), sep = "_")
+    mutate(Reads = ifelse(grepl("split", X1), "split", "all")) %>% 
+    separate(X1, c("Isolate"), sep = "(?:.(?!_))+$")
   
-  colnames(cov)[3:5] <- c("CHR", "POS", "Cov")
+  colnames(cov) <- c("Isolate", "CHR", "POS", "Cov", "Reads")
+  
   
   
   p1 <- cov %>% 
