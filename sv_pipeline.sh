@@ -264,8 +264,8 @@ LargeSV_denovo "$bam" "${Data}/${sample}_lumpy_svtyper_SVs.vcf.gz" "$Ref_name" "
 
 gridss \
   --reference "$Ref_name" \
-  --output "${sample}_gridss.vcf.gz" \
-  --assembly "${sample}_gridss.bam" \
+  --output "${Data}/${sample}_gridss.vcf.gz" \
+  --assembly "${Data}/${sample}_gridss.bam" \
   --threads $threads \
   --workingdir "$Temp" \
   --jvmheap "${ram}g" \
