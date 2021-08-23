@@ -127,7 +127,7 @@ if (length(args)==0) {
   
   
   
-  p_final <- subplot(p3, p4, nrows = 2) %>%
+  p_final <- subplot(p3, p4, nrows = 2, margin = 0.05) %>%
     layout(plot_bgcolor="#3A3A39",
            paper_bgcolor ="#3A3A39",
            xaxis = list(tickcolor = "#FEFBE8",
