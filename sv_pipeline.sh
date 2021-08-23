@@ -98,8 +98,12 @@ fi
 
 if [[ ! -z $plots ]]
 then
+    # Get script dir, posix version from stack
+    a="/$0"; a=${a%/*}; a=${a:-.}; a=${a#/}/; Script_dir=$(cd $a; pwd)
+    
     cd "$plots"
-    splt_plots.R "$plots"
+    ${Script_dir}/splt_plots.R "$plots"
+    
     exit 0
 fi
 
@@ -290,6 +294,6 @@ then
       --t $threads
       # --cutoff 5 --max_range 1.2 --max_clip 50 --log --bam
       
-      mkdir "${Data}/IS6110"
-      mv *IS6110* "${Data}/IS6110"
+      mkdir "${Data}/IS6110_${sample}"
+      mv *IS6110* "${Data}/IS6110_${sample}"
 fi
