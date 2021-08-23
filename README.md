@@ -41,9 +41,9 @@ singularity run /path/to/container/sv_pipe.sif \
   /path/to/script/sv_pipeline.sh \
   --threads 4 \
   --reference "/path/to/references/NC_000962.3.fasta" \
-  -read_dir "/path/to/reads/" \
-  --read_1 "read_R1_001.fastq.gz" \
-  --read_2 "read_R2_001.fastq.gz" \
+  --read_dir "/path/to/reads/" \
+  --read_1 "/path/to/reads/read_R1_001.fastq.gz" \
+  --read_2 "/path/to/reads/read_R2_001.fastq.gz" \
   --is_search \
   --Ref_gbk "/path/to/references/NC_000962.3.gb" \
   --is6110 "/path/to/references/IS6110.fasta"

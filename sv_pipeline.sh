@@ -249,6 +249,9 @@ command -v svtyper >/dev/null 2>&1 || { echo >&2 "I require svtyper but it's not
 # R2="${nme}_R2_001.fastq.gz"
 sample="${R1/_R1_001.fastq.gz/}"
 bam="${Data}/${sample}_svs.bam"
+R1="${Data}/${R1}"
+R2="${Data}/${R2}"
+
 
 Temp="${Data}/${sample}"
 mkdir "$Temp"
