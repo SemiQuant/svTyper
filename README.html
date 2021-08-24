@@ -298,6 +298,25 @@ pre code {
 </tr>
 </tbody>
 </table>
+<div id="basic-usage" class="section level2">
+<h2>basic usage</h2>
+<p>Get the singularity container</p>
+<pre><code>singularity pull library://semiquan7/default/sv_pipe:latest
+# or singularity pull library://semiquan7/default/sv_pipe:sha256.5161aa04141b0616adbe021ec19d6905f67adfce12ab4adf8244535cdf50212e</code></pre>
+<p>Get the script and reference files</p>
+<pre><code>git clone --recursive https://github.com/SemiQuant/svTyper.git</code></pre>
+<p>Run main</p>
+<pre><code>singularity run /path/to/container/sv_pipe.sif \
+  /path/to/script/sv_pipeline.sh \
+  --threads 4 \
+  --reference &quot;/path/to/references/NC_000962.3.fasta&quot; \
+  --read_dir &quot;/path/to/reads/&quot; \
+  --read_1 &quot;/path/to/reads/read_R1_001.fastq.gz&quot; \
+  --read_2 &quot;/path/to/reads/read_R2_001.fastq.gz&quot; \
+  --is_search \
+  --Ref_gbk &quot;/path/to/references/NC_000962.3.gb&quot; \
+  --is6110 &quot;/path/to/references/IS6110.fasta&quot;</code></pre>
+</div>
 </div>
 <div id="outputs" class="section level1">
 <h1>Outputs</h1>
@@ -364,6 +383,8 @@ pre code {
 <ul>
 <li>Add mask file (NC_000962.3.nonUniquelyMappable.bed) so we can ignore repetative regions and better detect SVs throught the genome</li>
 <li>Make a single use option for the ‘Split_gene’ function</li>
+<li>Fix denovo for gridss</li>
+<li>Fix output naming and folders</li>
 </ul>
 </div>
 </div>

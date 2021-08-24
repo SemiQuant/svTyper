@@ -3,9 +3,11 @@ args = commandArgs(trailingOnly=TRUE)
 
 if (length(args)==0) {
   stop("Please supply an input dir!", call.=FALSE)
-} else if (length(args)==1) {
+} else if (length(args)==5) {
   require(plotly, quietly = T)
   require(tidyverse, quietly = T)
+  require(vcfR, quietly = T)
+  require(DT, quietly = T)
   files <- list.files(args[1], pattern = "_splits.coverage.tsv", full.names = T, recursive = T)
   
   # cov <- files %>%
@@ -148,5 +150,65 @@ if (length(args)==0) {
     )
   
   # orca(p_final, "splits.pdf")
-  htmlwidgets::saveWidget(as_widget(p_final), "splits.html") 
+  # htmlwidgets::saveWidget(as_widget(p_final), "splits.html") 
+  
+  
+  
+
+  
+  gene_start <- args[2]
+  gene_end <-args[3]
+  is_files <- list.files(path = args[1], pattern = "_IS6110_table.txt", full.names = T, recursive = T)
+  ss_files <- list.files(path = args[1], pattern = "_gridss.vcf.gz", full.names = T, recursive = T)
+  lp_files <- list.files(path = args[1], pattern = "_lumpy_SVs.denovo.vcf.gz", full.names = T, recursive = T)
+  
+  
+  
+  
+  
+  if (gene_start > gene_end){
+    tmp <- gene_start
+    gene_start <- gene_end
+    gene_end <- tmp
+  }
+  
+  
+  is_tib <- data_frame(Indiv = gsub("_IS6110_table.txt", "", basename(is_files))) %>% 
+    mutate(file_contents = map(is_files, ~ read_tsv(file.path(.)))) %>% 
+    unnest %>% 
+    filter((x >= gene_end & x <= gene_start) | (y <= gene_end & y >= gene_start)) %>% # this make sense?
+    select(Indiv, x, y)
+  
+  try({
+    cbind(is_tib, "IS element")
+    colnames(is_tib) <- c("ID", "Start", "End", "IS elemnt")
+    
+  })
+  
+  
+  ss_tib <- ss_files %>% 
+    map(function(x) vcfR2tidy(read.vcfR(x))$gt) %>% 
+    map_dfr(bind_rows) %>% 
+    select(POS, Indiv, gt_AF) %>% 
+    filter((POS >= gene_end & POS <= gene_start) | (POS <= gene_end & POS >= gene_start)) # this doesnt make sense
+  
+  
+  lp_tib <- data_frame(Indiv = gsub("_lumpy_SVs.denovo.vcf.gz", "", basename(lp_files))) %>% 
+    mutate(file_contents = map(lp_files, ~ vcfR2tidy(read.vcfR(file.path(.)))$gt)) %>% 
+    unnest
+  lp_tib <- lp_tib %>% 
+    select(Indiv, POS, gt_AD, gt_GT_alleles) %>% 
+    filter((POS >= gene_end & POS <= gene_start) | (POS <= gene_end & POS >= gene_start)) # this doesnt make sense
+  
+  
+  save.image(file = paste0(args[1], "/", args[4], "_make_dash_dat.Rimg"))
+  
+  
+  rmarkdown::render(
+    input = paste0(args[5], "/make_dash.Rmd"),
+    params = list(filename  = paste0(args[1], "/", args[4], "_make_dash_dat.Rimg")),
+    output_file = paste0(args[4], "_dash.html"),
+    output_dir = args[1]
+    )
+  
 }

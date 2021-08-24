@@ -8,8 +8,9 @@ Usage Options
   -r1|--read_1 = read 1 name
   -r2|--read_2 = read 2 name
   -c|--chr = reference name
+  -g|--gene_name = main gene name (Default: Rv0678)
   -s|--gene_str = main gene start (Default: 778990 [Rv0678])
-  -e|--gene_send = main gene end (Default: 779487 [Rv0678])
+  -e|--gene_end = main gene end (Default: 779487 [Rv0678])
   -i|--is_search = search for IS6110 sequences?
   -rg|--Ref_gbk = if --is_search then provide genome gbk
   -is|--is6110 = if --is_search then provide IS6110 (or other) fasta
@@ -55,10 +56,13 @@ declare_globals () {
           -c|--chr)
           chr="$2"
           ;;
+          -g|--gene_name)
+          gene_name="$2"
+          ;;
           -s|--gene_str)
           gene_start="$2"
           ;;
-          -e|--gene_send)
+          -e|--gene_end)
           gene_end="$2"
           ;;
           -p|--plots)
@@ -96,14 +100,18 @@ then
 fi
 
 
+gene_name=${gene_name:-"Rv0678"}
+gene_start=${gene_start:-778990}
+gene_end=${gene_end:-779487}
+
 if [[ ! -z $plots ]]
 then
     # Get script dir, posix version from stack
     a="/$0"; a=${a%/*}; a=${a:-.}; a=${a#/}/; Script_dir=$(cd $a; pwd)
     
     cd "$plots"
-    ${Script_dir}/splt_plots.R "$plots"
-    
+    # ${Script_dir}/splt_plots.R "$plots" $gene_start $gene_end
+    ${Script_dir}/make_dash_data.R "$plots" $gene_start $gene_end "$gene_name" "${Script_dir}"
     exit 0
 fi
 
@@ -111,8 +119,6 @@ fi
 
 # set defaults
 threads=${threads:-4}
-gene_start=${gene_start:-778990}
-gene_end=${gene_end:-779487}
 chr=${chr:-"NC_000962.3"}
 ram=$(echo $threads*2 | bc)
 export PERL5LIB=/usr/local/bin/scalpel/
@@ -222,12 +228,12 @@ LargeSV_denovo () {
 }
 
 Split_gene () {
-    samtools depth -a -r "$1":${2}-${3} "${6}/${4}_sample.splitters.unsorted.bam" | awk -v tmp="${4}_split" '{print tmp"\t"$0}' > "${5}/${4}_splits.coverage.tsv"
-    echo "Median split reads on gene" >> "${5}/${4}_splits.coverage.info.txt"
-    awk ' { a[i++]=$3; } END { print a[int(i/2)]; }' "${5}/${4}_splits.coverage.tsv" >> "${5}/${4}_splits.coverage.info.txt"
-    echo "Positions with ≥1 split read" >> "${5}/${4}_splits.coverage.info.txt"
-    awk '{ if ($3!=0) print $0_}' "${5}/${4}_splits.coverage.info.txt" | wc - l >> "${5}/${4}_splits.coverage.info.txt"
-    samtools depth -a -r "$1":${2}-${3} "${7}" | awk -v tmp="${4}_all" '{print tmp"\t"$0}' >> "${5}/${4}_splits.coverage.tsv"
+    samtools depth -a -r "$1":${2}-${3} "${6}/${4}_sample.splitters.unsorted.bam" | awk -v tmp="${4}_split" '{print tmp"\t"$0}' > "${5}/${4}_${8}_splits.coverage.tsv"
+    echo "Median split reads on gene" >> "${5}/${4}_${8}_splits.coverage.info.txt"
+    awk ' { a[i++]=$3; } END { print a[int(i/2)]; }' "${5}/${4}_${8}_splits.coverage.tsv" >> "${5}/${4}_${8}_splits.coverage.info.txt"
+    echo "Positions with ≥1 split read" >> "${5}/${4}_${8}_splits.coverage.info.txt"
+    awk '{ if ($3!=0) print $0_}' "${5}/${4}_${8}_splits.coverage.info.txt" | wc - l >> "${5}/${4}_${8}_splits.coverage.info.txt"
+    samtools depth -a -r "$1":${2}-${3} "${7}" | awk -v tmp="${4}_all" '{print tmp"\t"$0}' >> "${5}/${4}_${8}_splits.coverage.tsv"
 }
 
 
@@ -256,13 +262,12 @@ bam="${Data}/${sample}_svs.bam"
 R1="${Data}/${R1}"
 R2="${Data}/${R2}"
 
-
 Temp="${Data}/${sample}"
 mkdir "$Temp"
 
 bwa_map "$Ref_name" "$R1" "$R2" "$sample" "$Data" $threads "$Temp"
 LargeSVs "$bam" "$Temp" "$sample" "$Data"
-Split_gene "$chr" $gene_start $gene_end "$sample" "$Data" "$Temp" "$bam"
+Split_gene "$chr" $gene_start $gene_end "$sample" "$Data" "$Temp" "$bam" "$gene_name"
 LargeSV_denovo "$bam" "${Data}/${sample}_lumpy_svtyper_SVs.vcf.gz" "$Ref_name" "$Data" $threads "$Temp" "$sample" "lumpy"
 
 

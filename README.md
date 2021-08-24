@@ -12,8 +12,9 @@ Program to find structural variants from Illumina sequencing.
 |     -r1\|--read_1         |     Read 1 name                                                                                                                   |     NA         |     Y           |   |
 |     -r2\|--read_2         |     Read 2 name                                                                                                                   |     NA         |     Y           |   |
 |     -c\|--chr             |     Reference name                                                                                                                |     NA         |     Y           |   |
+| -g\|--gene_name     | Main gene name                                                                                                            | Rv0678  | N        |             |            |
 |     -s\|--gene_str        |     Main gene start                                                                                                               |     778990     |     N           |   |
-|     -e\|--gene_send       |     Main gene end                                                                                                                 |     779487     |     N           |   |
+|     -e\|--gene_end       |     Main gene end                                                                                                                 |     779487     |     N           |   |
 |     -i\|--is_search       |     Search for IS6110 sequences?                                                                                                  |     NA         |     N           |   |
 |     -rg\|--Ref_gbk        |     If --is_search then provide genome gbk                                                                                        |     NA         |     N           |   |
 |     -is\|--is6110         |     If --is_search then provide IS6110 (or other) fasta                                                                           |     NA         |     N           |   |
@@ -70,5 +71,5 @@ singularity run /path/to/container/sv_pipe.sif \
 
 * Add mask file (NC_000962.3.nonUniquelyMappable.bed) so we can ignore repetative regions and better detect SVs throught the genome
 * Make a single use option for the 'Split_gene' function
-* Fix denovo for gridss
 * Fix output naming and folders
+* Filtering of vcfs is not correct, it does not account for the length of the variant

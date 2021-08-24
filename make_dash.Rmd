@@ -1,0 +1,74 @@
+---
+title: "SV_typer"
+params:
+  filename: dat
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill #scroll
+    logo: sq.png
+    favicon: favicon.ico
+    navbar:
+      - { title: "SemiQuant", href: "http://www.SemiQuant.com", align: right }
+    self_contained: TRUE
+    highlight: zenburn
+    css: Dash_v1.2.css
+    font-family: 'Helvetica, Arial, sans-serif;'
+bootstrap_compatible: TRUE
+---
+
+
+```{r setup, include=FALSE}
+require(plotly, quietly = T)
+require(tidyverse, quietly = T)
+require(vcfR, quietly = T)
+require(DT, quietly = T)
+require(flexdashboard, quietly = T)
+load(params$filename)
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+htmltools::img(src = knitr::image_uri("/Users/SemiQuant/Bioinformatics/Projects/paul_RNAseq/sq.png"), 
+               alt = 'logo', 
+               style = 'position:absolute; top:0; left:0; padding:10px;')
+```
+
+<script>
+  $('.navbar-logo').wrap('<a href="http://www.semiquent.com">');
+</script>
+
+
+Split read coverage
+===================================== 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+p_final
+```
+
+
+<!-- SVs and IS -->
+<!-- =====================================  -->
+
+# IS sequences
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  DT::datatable(is_tib)
+                # caption = 'Table 3: IS sequences')
+```
+
+# Gridss SVs
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  DT::datatable(ss_tib)
+                # caption = 'Table 1: Gridss SVs')
+
+```
+
+# Lumpy SVs
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  DT::datatable(lp_tib)
+                # caption = 'Table 2: Lumpy SVs')
+
+```
