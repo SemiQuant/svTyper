@@ -158,9 +158,9 @@ if (length(args)==0) {
   
   gene_start <- args[2]
   gene_end <-args[3]
-  is_files <- list.files(path = args[1], pattern = "_IS6110_table.txt", full.names = T, recursive = T)
-  ss_files <- list.files(path = args[1], pattern = "_gridss.vcf.gz", full.names = T, recursive = T)
-  lp_files <- list.files(path = args[1], pattern = "_lumpy_SVs.denovo.vcf.gz", full.names = T, recursive = T)
+  is_files <- list.files(path = args[1], pattern = "_IS6110_table.txt$", full.names = T, recursive = T)
+  ss_files <- list.files(path = args[1], pattern = "_gridss.vcf.gz$", full.names = T, recursive = T)
+  lp_files <- list.files(path = args[1], pattern = "_lumpy_SVs.denovo.vcf.gz$", full.names = T, recursive = T)
   
   
   
