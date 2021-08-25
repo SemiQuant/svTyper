@@ -234,62 +234,69 @@ pre code {
 <td></td>
 </tr>
 <tr class="odd">
+<td>-g|–gene_name</td>
+<td>Main gene name</td>
+<td>Rv0678</td>
+<td>N</td>
+<td></td>
+</tr>
+<tr class="even">
 <td>-s|–gene_str</td>
 <td>Main gene start</td>
 <td>778990</td>
 <td>N</td>
 <td></td>
 </tr>
-<tr class="even">
-<td>-e|–gene_send</td>
+<tr class="odd">
+<td>-e|–gene_end</td>
 <td>Main gene end</td>
 <td>779487</td>
 <td>N</td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>-i|–is_search</td>
 <td>Search for IS6110 sequences?</td>
 <td>NA</td>
 <td>N</td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>-rg|–Ref_gbk</td>
 <td>If –is_search then provide genome gbk</td>
 <td>NA</td>
 <td>N</td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>-is|–is6110</td>
 <td>If –is_search then provide IS6110 (or other) fasta</td>
 <td>NA</td>
 <td>N</td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td></td>
 <td></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Single Use Options</td>
 <td></td>
 <td>NA</td>
 <td></td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>-dl|–container</td>
 <td>download the singularity container to this path and exit (then run using ‘singularity run ~/wgs_pipeline_latest.sif’)</td>
 <td>NA</td>
 <td>N</td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>-p|–plots</td>
 <td>dir_to_outputs make plots of the ‘Split_gene’ function output</td>
 <td>NA</td>
@@ -302,7 +309,7 @@ pre code {
 <h2>basic usage</h2>
 <p>Get the singularity container</p>
 <pre><code>singularity pull library://semiquan7/default/sv_pipe:latest
-# or singularity pull library://semiquan7/default/sv_pipe:sha256.5161aa04141b0616adbe021ec19d6905f67adfce12ab4adf8244535cdf50212e</code></pre>
+# or singularity pull library://semiquan7/default/sv_pipe:sha256.ba30c0474c8b1e0784cbcfeebbd7f299e729cfcf1e9d9c76aac405a6af0c0047</code></pre>
 <p>Get the script and reference files</p>
 <pre><code>git clone --recursive https://github.com/SemiQuant/svTyper.git</code></pre>
 <p>Run main</p>
@@ -378,13 +385,14 @@ pre code {
 </tr>
 </tbody>
 </table>
-<div id="todo" class="section level2">
-<h2>TODO</h2>
+<p><a href="%22https://svtype.netlify.app/%22">Example output limited data, update</a></p>
+<div id="todo" class="section level3">
+<h3>TODO</h3>
 <ul>
 <li>Add mask file (NC_000962.3.nonUniquelyMappable.bed) so we can ignore repetative regions and better detect SVs throught the genome</li>
 <li>Make a single use option for the ‘Split_gene’ function</li>
-<li>Fix denovo for gridss</li>
 <li>Fix output naming and folders</li>
+<li>Filtering of vcfs is not correct, it does not account for the length of the variant</li>
 </ul>
 </div>
 </div>
