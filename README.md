@@ -67,7 +67,9 @@ singularity run /path/to/container/sv_pipe.sif \
 |     splits.html                                  |     Interactive plot of coverage and split read coverage        |
 
 
-[Example output limited data, update]("https://svtype.netlify.app/")
+[Example output limited data, update](https://www.svtype.netlify.app)
+
+[Example output](https://svtype.netlify.app/)
 
 
 ### TODO
