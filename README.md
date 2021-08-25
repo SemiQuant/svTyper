@@ -70,7 +70,6 @@ singularity run /path/to/container/sv_pipe.sif \
 [Example output limited data, update]("https://svtype.netlify.app/")
 
 
-
 ### TODO
 
 * Add mask file (NC_000962.3.nonUniquelyMappable.bed) so we can ignore repetative regions and better detect SVs throught the genome

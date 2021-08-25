@@ -1,5 +1,8 @@
 ~%2FBioinformatics%2FPipelines%2FsvTyper%2FIS_mapper%2Fscripts%2Fismap_edited.py="9A168D4A"
 ~%2FBioinformatics%2FPipelines%2FsvTyper%2FREADME.md="E3D04E02"
+~%2FBioinformatics%2FPipelines%2FsvTyper%2Fmake_dash.Rmd="F9B0D2D8"
+~%2FBioinformatics%2FPipelines%2FsvTyper%2Fmake_dash_data.R="DB110FCA"
 ~%2FBioinformatics%2FPipelines%2FsvTyper%2Freferences%2FNC_000962.3.fasta="7BE188E7"
 ~%2FBioinformatics%2FPipelines%2FsvTyper%2Fsplt_plots.R="F02CBAF1"
 ~%2FBioinformatics%2FPipelines%2FsvTyper%2Fsv_pipeline.sh="F75CCFA5"
+~%2FBioinformatics%2FPipelines%2FsvTyper%2Ftmp.R="9AB24FDA"
