@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
+knitr::opts_chunk$set(dev="CairoPNG")
 
 if (length(args)==0) {
   stop("Please supply an input dir!", call.=FALSE)
@@ -208,7 +209,14 @@ if (length(args)==0) {
     input = paste0(args[5], "/make_dash.Rmd"),
     params = list(filename  = paste0(args[1], "/", args[4], "_make_dash_dat.Rimg")),
     output_file = paste0(args[4], "_dash.html"),
-    output_dir = args[1]
+    output_dir = args[1],
+    clean = T
     )
+  
+  # Twas a bitch to get this working in an old container 
+  # apt-get install libgtk2.0-dev libcairo2-dev xvfb xauth xfonts-base libxt-dev r-cran-cairodevic
+  # set knitr::opts_chunk$set(dev="CairoPNG")
+  # install.packages("Cairo", dep = T)
+  # install.packages("rmarkdown", dep = T)
   
 }

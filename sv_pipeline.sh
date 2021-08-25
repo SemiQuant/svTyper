@@ -110,8 +110,9 @@ then
     # Get script dir, posix version from stack
     a="/$0"; a=${a%/*}; a=${a:-.}; a=${a#/}/; Script_dir=$(cd $a; pwd)
     
-    cd "$plots"
+    # cd "$plots"
     # ${Script_dir}/splt_plots.R "$plots" $gene_start $gene_end
+    cd "${Script_dir}"
     ${Script_dir}/make_dash_data.R "$plots" $gene_start $gene_end "$gene_name" "${Script_dir}"
     exit 0
 fi
