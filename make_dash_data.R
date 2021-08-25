@@ -213,10 +213,5 @@ if (length(args)==0) {
     clean = T
     )
   
-  # Twas a bitch to get this working in an old container 
-  # apt-get install libgtk2.0-dev libcairo2-dev xvfb xauth xfonts-base libxt-dev r-cran-cairodevic
-  # set knitr::opts_chunk$set(dev="CairoPNG")
-  # install.packages("Cairo", dep = T)
-  # install.packages("rmarkdown", dep = T)
   
 }
