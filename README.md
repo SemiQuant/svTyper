@@ -78,3 +78,4 @@ singularity run /path/to/container/sv_pipe.sif \
 * Make a single use option for the 'Split_gene' function
 * Fix output naming and folders
 * Filtering of vcfs is not correct, it does not account for the length of the variant
+* add samplot to make graphs of indels
