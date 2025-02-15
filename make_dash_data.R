@@ -31,8 +31,8 @@ if (length(args)==0) {
     # Read the raw data first
     tmp <- read_tsv(f, col_names = "raw_data", show_col_types = FALSE)
     
-    print("Initial raw data:")
-    print(head(tmp))
+    # print("Initial raw data:")
+    # print(head(tmp))
     
     # Split the single column into proper columns
     tmp <- tmp %>%
@@ -42,17 +42,17 @@ if (length(args)==0) {
                extra = "drop") %>%
       mutate(Reads = ifelse(grepl("split", Name), "split", "all"))
     
-    print("After splitting columns:")
-    print(head(tmp))
+    # print("After splitting columns:")
+    # print(head(tmp))
     
     cov <- bind_rows(cov, tmp)
     cli_progress_update()
   }
   cli_progress_done()
   
-  print("Combined data before cleanup:")
-  print(head(cov))
-  print(colnames(cov))
+  # print("Combined data before cleanup:")
+  # print(head(cov))
+  # print(colnames(cov))
   
   # Clean up coverage data and ensure numeric columns
   cov <- cov %>%
@@ -62,9 +62,9 @@ if (length(args)==0) {
       Cov = as.numeric(as.character(Cov))
     )
 
-  print("Final data structure:")
-  print(head(cov))
-  print(str(cov))
+  # print("Final data structure:")
+  # print(head(cov))
+  # print(str(cov))
 
   cli_alert_info("Creating plots...")
 
