@@ -1,0 +1,2 @@
+region	orientation	x	y	gap	call	percent_ID	percent_cov	left_gene	left_description	left_strand	left_distance	right_gene	right_description	right_strand	right_distance	gene_interruption
+No hits found

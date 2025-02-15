@@ -1,6 +1,5 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
-knitr::opts_chunk$set(dev="CairoPNG")
 
 if (length(args)==0) {
   stop("Please supply an input dir!", call.=FALSE)
@@ -9,15 +8,11 @@ if (length(args)==0) {
   require(tidyverse, quietly = T)
   require(vcfR, quietly = T)
   require(DT, quietly = T)
+  
+  # Read split coverage files
   files <- list.files(args[1], pattern = "_splits.coverage.tsv", full.names = T, recursive = T)
   
-  # cov <- files %>%
-  #   map(read_tsv, col_names = F) %>%
-  #   reduce(rbind) %>% 
-  #   separate(X1, c("Isolate", "Reads"), sep = "_")
-  # colnames(cov)[3:5] <- c("CHR", "POS", "Cov")
-  
-  # above was problematic with sample nanimgs so
+  # Process coverage data
   cov <- files %>%
     map(read_tsv, col_names = F) %>%
     reduce(rbind) %>% 
@@ -26,6 +21,7 @@ if (length(args)==0) {
   
   colnames(cov) <- c("Isolate", "CHR", "POS", "Cov", "Reads")
   
+  # Create split reads plot
   p1 <- cov %>% 
     filter(grepl("split", Reads)) %>% 
     plot_ly(x = ~POS, y = ~Cov, color = ~Isolate, type = 'scatter', mode = 'lines', legendgroup = ~Isolate) %>% 
@@ -41,7 +37,6 @@ if (length(args)==0) {
       font = list(size = 12)
     ) %>%
     layout(
-      # showlegend = FALSE,
       shapes = list(
         type = "rect",
         x0 = 0,
@@ -57,6 +52,7 @@ if (length(args)==0) {
       )
     ) 
   
+  # Create all reads plot
   p2 <- cov %>% 
     filter(grepl("all", Reads)) %>% 
     plot_ly(x = ~POS, y = ~Cov, color = ~Isolate, type = 'scatter', mode = 'lines', legendgroup = ~Isolate) %>% 
@@ -72,7 +68,6 @@ if (length(args)==0) {
       font = list(size = 12)
     ) %>%
     layout(
-      # showlegend = FALSE,
       shapes = list(
         type = "rect",
         x0 = 0,
@@ -88,12 +83,10 @@ if (length(args)==0) {
       )
     ) 
   
-  
-  # plot 1, side by side of all and split
+  # Combine plots side by side
   p3 <- subplot(p1, p2, shareY = T)
   
-  
-  # plot 2, percentage of split vs all
+  # Create proportion plot
   p4 <- cov %>% 
     pivot_wider(names_from = Reads, values_from = Cov, values_fill = 0) %>% 
     mutate(prop = split/all) %>% 
@@ -110,7 +103,6 @@ if (length(args)==0) {
       font = list(size = 12)
     ) %>%
     layout(
-      # showlegend = FALSE,
       shapes = list(
         type = "rect",
         x0 = 0,
@@ -126,92 +118,83 @@ if (length(args)==0) {
       )
     ) 
   
-  
-  
+  # Create final combined plot
   p_final <- subplot(p3, p4, nrows = 2, margin = 0.05) %>%
     layout(plot_bgcolor="#3A3A39",
            paper_bgcolor ="#3A3A39",
            xaxis = list(tickcolor = "#FEFBE8",
-                        gridcolor = "rgba(254, 251, 232, 0.2)",
-                        linecolor = "#FEFBE8"),
+                       gridcolor = "rgba(254, 251, 232, 0.2)",
+                       linecolor = "#FEFBE8"),
            yaxis = list(tickcolor = "#FEFBE8",
-                        gridcolor = "rgba(254, 251, 232, 0.2)",
-                        linecolor = "#FEFBE8"),
+                       gridcolor = "rgba(254, 251, 232, 0.2)",
+                       linecolor = "#FEFBE8"),
            legend = list(
-             # x = 0.6, y = 0.4,
              font = list(
                family = "sans-serif",
                size = 12,
                color = "#FEFBE8"),
              bgcolor = "#3A3A39",
              bordercolor = "#3A3A39"
-             # borderwidth = 2
            ),
            font = list(color = '#FEFBE8')
     )
   
-  # orca(p_final, "splits.pdf")
-  # htmlwidgets::saveWidget(as_widget(p_final), "splits.html") 
+  # Process gene coordinates
+  gene_start <- as.numeric(args[2])
+  gene_end <- as.numeric(args[3])
   
-  
-  
-
-  
-  gene_start <- args[2]
-  gene_end <-args[3]
+  # Find relevant files
   is_files <- list.files(path = args[1], pattern = "_IS6110_table.txt$", full.names = T, recursive = T)
   ss_files <- list.files(path = args[1], pattern = "_gridss.vcf.gz$", full.names = T, recursive = T)
-  lp_files <- list.files(path = args[1], pattern = "_lumpy_SVs.denovo.vcf.gz$", full.names = T, recursive = T)
+  lp_files <- list.files(path = args[1], pattern = "_sample.splitters.unsorted.bam$", full.names = T, recursive = T)
   
-  
-  
-  
-  
-  if (gene_start > gene_end){
+  if (gene_start > gene_end) {
     tmp <- gene_start
     gene_start <- gene_end
     gene_end <- tmp
   }
   
-  
-  is_tib <- data_frame(Indiv = gsub("_IS6110_table.txt", "", basename(is_files))) %>% 
-    mutate(file_contents = map(is_files, ~ read_tsv(file.path(.)))) %>% 
-    unnest %>% 
-    filter((x >= gene_end & x <= gene_start) | (y <= gene_end & y >= gene_start)) %>% # this make sense?
-    select(Indiv, x, y)
-  
-  try({
-    cbind(is_tib, "IS element")
-    colnames(is_tib) <- c("ID", "Start", "End", "IS elemnt")
+  # Process ISMap results
+  if (length(is_files) > 0) {
+    is_tib <- tibble(Indiv = gsub("_IS6110_table.txt", "", basename(is_files))) %>% 
+      mutate(file_contents = map(is_files, ~ read_tsv(file.path(.)))) %>% 
+      unnest %>% 
+      filter((x >= gene_start & x <= gene_end) | (y <= gene_end & y >= gene_start)) %>%
+      select(Indiv, x, y)
     
-  })
+    colnames(is_tib) <- c("ID", "Start", "End", "IS element")
+  } else {
+    is_tib <- tibble(ID = character(), Start = numeric(), End = numeric())
+  }
   
+  # Process GRIDSS results
+  if (length(ss_files) > 0) {
+    ss_tib <- ss_files %>% 
+      map(function(x) vcfR2tidy(read.vcfR(x))$gt) %>% 
+      map_dfr(bind_rows) %>% 
+      select(POS, Indiv, gt_AF) %>% 
+      filter(POS >= gene_start & POS <= gene_end)
+  } else {
+    ss_tib <- tibble(POS = numeric(), Indiv = character(), gt_AF = numeric())
+  }
   
-  ss_tib <- ss_files %>% 
-    map(function(x) vcfR2tidy(read.vcfR(x))$gt) %>% 
-    map_dfr(bind_rows) %>% 
-    select(POS, Indiv, gt_AF) %>% 
-    filter((POS >= gene_end & POS <= gene_start) | (POS <= gene_end & POS >= gene_start)) # this doesnt make sense
+  # Process split read alignment results
+  if (length(lp_files) > 0) {
+    lp_tib <- tibble(Indiv = gsub("_sample.splitters.unsorted.bam", "", basename(lp_files))) %>%
+      select(Indiv)
+  } else {
+    lp_tib <- tibble(Indiv = character())
+  }
   
-  
-  lp_tib <- data_frame(Indiv = gsub("_lumpy_SVs.denovo.vcf.gz", "", basename(lp_files))) %>% 
-    mutate(file_contents = map(lp_files, ~ vcfR2tidy(read.vcfR(file.path(.)))$gt)) %>% 
-    unnest
-  lp_tib <- lp_tib %>% 
-    select(Indiv, POS, gt_AD, gt_GT_alleles) %>% 
-    filter((POS >= gene_end & POS <= gene_start) | (POS <= gene_end & POS >= gene_start)) # this doesnt make sense
-  
-  
+  # Save workspace
   save.image(file = paste0(args[1], "/", args[4], "_make_dash_dat.Rimg"))
   
-  
+  # Render dashboard
   rmarkdown::render(
     input = paste0(args[5], "/make_dash.Rmd"),
-    params = list(filename  = paste0(args[1], "/", args[4], "_make_dash_dat.Rimg")),
+    params = list(filename = paste0(args[1], "/", args[4], "_make_dash_dat.Rimg")),
     output_file = paste0(args[4], "_dash.html"),
     output_dir = args[1],
     clean = T
-    )
-  
-  
+  )
 }

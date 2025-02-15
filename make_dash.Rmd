@@ -1,22 +1,14 @@
 ---
-title: "SV_typer"
+title: "SV Analysis Dashboard"
 params:
   filename: dat
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
-    vertical_layout: fill #scroll
-    logo: sq.png
-    favicon: favicon.ico
-    navbar:
-      - { title: "SemiQuant", href: "http://www.SemiQuant.com", align: right }
-    self_contained: TRUE
-    highlight: zenburn
-    css: Dash_v1.2.css
-    font-family: 'Helvetica, Arial, sans-serif;'
-bootstrap_compatible: TRUE
+    vertical_layout: fill
+    theme: cosmo
+    css: styles.css
 ---
-
 
 ```{r setup, include=FALSE}
 require(plotly, quietly = T)
@@ -27,48 +19,40 @@ require(flexdashboard, quietly = T)
 load(params$filename)
 ```
 
+Split Read Coverage
+=====================================
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-htmltools::img(src = knitr::image_uri("sq.png"), 
-               alt = 'logo', 
-               style = 'position:absolute; top:0; left:0; padding:10px;')
-```
+Column {data-width=1000}
+-------------------------------------
 
-<script>
-  $('.navbar-logo').wrap('<a href="http://www.semiquent.com">');
-</script>
-
-
-Split read coverage
-===================================== 
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+### Coverage Plot
+```{r}
 p_final
 ```
 
+Structural Variants
+=====================================
 
-<!-- SVs and IS -->
-<!-- =====================================  -->
+Column {.tabset}
+-------------------------------------
 
-# IS sequences
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-  DT::datatable(is_tib)
-                # caption = 'Table 3: IS sequences')
+### IS Elements
+```{r}
+DT::datatable(is_tib,
+              options = list(pageLength = 10),
+              caption = 'IS Element Locations')
 ```
 
-# Gridss SVs
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-  DT::datatable(ss_tib)
-                # caption = 'Table 1: Gridss SVs')
-
+### GRIDSS SVs
+```{r}
+DT::datatable(ss_tib,
+              options = list(pageLength = 10),
+              caption = 'GRIDSS Structural Variants')
 ```
 
-# Lumpy SVs
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-  DT::datatable(lp_tib)
-                # caption = 'Table 2: Lumpy SVs')
-
+### Split Reads
+```{r}
+DT::datatable(lp_tib,
+              options = list(pageLength = 10),
+              caption = 'Split Read Alignments')
 ```
