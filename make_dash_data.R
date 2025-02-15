@@ -4,24 +4,44 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   stop("Please supply an input dir!", call.=FALSE)
 } else if (length(args)==5) {
-  require(plotly, quietly = T)
-  require(tidyverse, quietly = T)
-  require(vcfR, quietly = T)
-  require(DT, quietly = T)
+  # Load required packages with error handling
+  required_packages <- c("plotly", "tidyverse", "vcfR", "DT", "cli")
+  for(pkg in required_packages) {
+    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+      install.packages(pkg)
+      library(pkg, character.only = TRUE)
+    }
+  }
+
+  cli_alert_info("Processing coverage files...")
   
   # Read split coverage files
   files <- list.files(args[1], pattern = "_splits.coverage.tsv", full.names = T, recursive = T)
   
-  # Process coverage data
-  cov <- files %>%
-    map(read_tsv, col_names = F) %>%
-    reduce(rbind) %>% 
-    mutate(Reads = ifelse(grepl("split", X1), "split", "all")) %>% 
-    separate(X1, c("Isolate"), sep = "(?:.(?!_))+$")
+  if(length(files) == 0) {
+    cli_alert_warning("No coverage files found!")
+    return()
+  }
+
+  # Process coverage data with progress bar
+  cli_progress_bar("Reading coverage files", total = length(files))
+  cov <- tibble()
+  for(f in files) {
+    tmp <- read_tsv(f, col_names = F, show_col_types = FALSE) %>%
+      mutate(Reads = ifelse(grepl("split", X1), "split", "all"))
+    cov <- bind_rows(cov, tmp)
+    cli_progress_update()
+  }
+  cli_progress_done()
   
-  colnames(cov) <- c("Isolate", "CHR", "POS", "Cov", "Reads")
-  
-  # Create split reads plot
+  # Clean up coverage data
+  cov <- cov %>%
+    separate(X1, c("Isolate"), sep = "_(?=[^_]+$)", extra = "drop") %>%
+    rename(CHR = X2, POS = X3, Cov = X4)
+
+  cli_alert_info("Creating plots...")
+
+  # Create split reads plot with proper layout
   p1 <- cov %>% 
     filter(grepl("split", Reads)) %>% 
     plot_ly(x = ~POS, y = ~Cov, color = ~Isolate, type = 'scatter', mode = 'lines', legendgroup = ~Isolate) %>% 
@@ -37,21 +57,11 @@ if (length(args)==0) {
       font = list(size = 12)
     ) %>%
     layout(
-      shapes = list(
-        type = "rect",
-        x0 = 0,
-        x1 = 1,
-        xref = "paper",
-        y0 = 0, 
-        y1 = 16,
-        yanchor = 1,
-        yref = "paper",
-        ysizemode = "pixel",
-        fillcolor = toRGB("gray"),
-        line = list(color = "transparent")
-      )
-    ) 
-  
+      xaxis = list(title = "Position"),
+      yaxis = list(title = "Coverage"),
+      showlegend = TRUE
+    )
+
   # Create all reads plot
   p2 <- cov %>% 
     filter(grepl("all", Reads)) %>% 
@@ -68,24 +78,14 @@ if (length(args)==0) {
       font = list(size = 12)
     ) %>%
     layout(
-      shapes = list(
-        type = "rect",
-        x0 = 0,
-        x1 = 1,
-        xref = "paper",
-        y0 = 0, 
-        y1 = 16,
-        yanchor = 1,
-        yref = "paper",
-        ysizemode = "pixel",
-        fillcolor = toRGB("gray"),
-        line = list(color = "transparent")
-      )
-    ) 
-  
+      xaxis = list(title = "Position"),
+      yaxis = list(title = "Coverage"),
+      showlegend = FALSE
+    )
+
   # Combine plots side by side
   p3 <- subplot(p1, p2, shareY = T)
-  
+
   # Create proportion plot
   p4 <- cov %>% 
     pivot_wider(names_from = Reads, values_from = Cov, values_fill = 0) %>% 
@@ -103,56 +103,56 @@ if (length(args)==0) {
       font = list(size = 12)
     ) %>%
     layout(
-      shapes = list(
-        type = "rect",
-        x0 = 0,
-        x1 = 1,
-        xref = "paper",
-        y0 = 0, 
-        y1 = 16,
-        yanchor = 1,
-        yref = "paper",
-        ysizemode = "pixel",
-        fillcolor = toRGB("gray"),
-        line = list(color = "transparent")
-      )
-    ) 
-  
-  # Create final combined plot
-  p_final <- subplot(p3, p4, nrows = 2, margin = 0.05) %>%
-    layout(plot_bgcolor="#3A3A39",
-           paper_bgcolor ="#3A3A39",
-           xaxis = list(tickcolor = "#FEFBE8",
-                       gridcolor = "rgba(254, 251, 232, 0.2)",
-                       linecolor = "#FEFBE8"),
-           yaxis = list(tickcolor = "#FEFBE8",
-                       gridcolor = "rgba(254, 251, 232, 0.2)",
-                       linecolor = "#FEFBE8"),
-           legend = list(
-             font = list(
-               family = "sans-serif",
-               size = 12,
-               color = "#FEFBE8"),
-             bgcolor = "#3A3A39",
-             bordercolor = "#3A3A39"
-           ),
-           font = list(color = '#FEFBE8')
+      xaxis = list(title = "Position"),
+      yaxis = list(title = "Proportion"),
+      showlegend = TRUE
     )
-  
+
+  # Create final combined plot with proper styling
+  p_final <- subplot(p3, p4, nrows = 2, margin = 0.05) %>%
+    layout(
+      plot_bgcolor = "#3A3A39",
+      paper_bgcolor = "#3A3A39",
+      xaxis = list(
+        tickcolor = "#FEFBE8",
+        gridcolor = "rgba(254, 251, 232, 0.2)",
+        linecolor = "#FEFBE8"
+      ),
+      yaxis = list(
+        tickcolor = "#FEFBE8",
+        gridcolor = "rgba(254, 251, 232, 0.2)",
+        linecolor = "#FEFBE8"
+      ),
+      legend = list(
+        font = list(
+          family = "sans-serif",
+          size = 12,
+          color = "#FEFBE8"
+        ),
+        bgcolor = "#3A3A39",
+        bordercolor = "#3A3A39"
+      ),
+      font = list(color = '#FEFBE8')
+    )
+
   # Process gene coordinates
+  cli_alert_info("Processing gene coordinates...")
   gene_start <- as.numeric(args[2])
   gene_end <- as.numeric(args[3])
-  
-  # Find relevant files
-  is_files <- list.files(path = args[1], pattern = "_IS6110_table.txt$", full.names = T, recursive = T)
-  ss_files <- list.files(path = args[1], pattern = "_gridss.vcf.gz$", full.names = T, recursive = T)
-  lp_files <- list.files(path = args[1], pattern = "_sample.splitters.unsorted.bam$", full.names = T, recursive = T)
-  
+
   if (gene_start > gene_end) {
     tmp <- gene_start
     gene_start <- gene_end
     gene_end <- tmp
   }
+
+  # Find and process relevant files
+  cli_alert_info("Processing additional data files...")
+  
+  # Find relevant files
+  is_files <- list.files(path = args[1], pattern = "_IS6110_table.txt$", full.names = T, recursive = T)
+  ss_files <- list.files(path = args[1], pattern = "_gridss.vcf.gz$", full.names = T, recursive = T)
+  lp_files <- list.files(path = args[1], pattern = "_sample.splitters.unsorted.bam$", full.names = T, recursive = T)
   
   # Process ISMap results
   if (length(is_files) > 0) {
@@ -197,4 +197,6 @@ if (length(args)==0) {
     output_dir = args[1],
     clean = T
   )
+  
+  cli_alert_success("Dashboard data generation complete!")
 }
