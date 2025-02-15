@@ -27,20 +27,42 @@ if (length(args)==0) {
   cli_progress_bar("Reading coverage files", total = length(files))
   cov <- tibble()
   for(f in files) {
-    tmp <- read_tsv(f, col_names = c("Name", "CHR", "POS", "Cov"), show_col_types = FALSE) %>%
-      mutate(Reads = ifelse(grepl("split", Name), "split", "all"))
+    cli_alert_info(paste("Reading file:", f))
+    tmp <- read_tsv(f, col_names = c("Name", "CHR", "POS", "Cov"), show_col_types = FALSE)
+    print("Raw data from file:")
+    print(head(tmp))
+    
+    tmp <- tmp %>% mutate(Reads = ifelse(grepl("split", Name), "split", "all"))
+    print("After adding Reads column:")
+    print(head(tmp))
+    
     cov <- bind_rows(cov, tmp)
     cli_progress_update()
   }
   cli_progress_done()
   
+  print("Combined data before cleanup:")
+  print(head(cov))
+  print(colnames(cov))
+  
   # Clean up coverage data and ensure numeric columns
   cov <- cov %>%
-    separate(Name, c("Isolate"), sep = "_(?=[^_]+$)", extra = "drop") %>%
+    separate(Name, c("Isolate"), sep = "_(?=[^_]+$)", extra = "drop")
+  
+    print("After separate:")
+    print(head(cov))
+    print(colnames(cov))
+  
+  # Now convert to numeric
+  cov <- cov %>%
     mutate(
-      POS = as.numeric(POS),
-      Cov = as.numeric(Cov)
+      POS = as.numeric(as.character(POS)),
+      Cov = as.numeric(as.character(Cov))
     )
+
+  print("Final data structure:")
+  print(head(cov))
+  print(str(cov))
 
   cli_alert_info("Creating plots...")
 
