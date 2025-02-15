@@ -5,7 +5,7 @@ if (length(args)==0) {
   stop("Please supply an input dir!", call.=FALSE)
 } else if (length(args)==5) {
   # Load required packages with error handling
-  required_packages <- c("plotly", "tidyverse", "vcfR", "DT", "cli")
+  required_packages <- c("plotly", "tidyverse", "vcfR", "DT", "cli", "flexdashboard")
   for(pkg in required_packages) {
     if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
       install.packages(pkg)
@@ -27,8 +27,8 @@ if (length(args)==0) {
   cli_progress_bar("Reading coverage files", total = length(files))
   cov <- tibble()
   for(f in files) {
-    tmp <- read_tsv(f, col_names = F, show_col_types = FALSE) %>%
-      mutate(Reads = ifelse(grepl("split", X1), "split", "all"))
+    tmp <- read_tsv(f, col_names = c("Name", "CHR", "POS", "Cov"), show_col_types = FALSE) %>%
+      mutate(Reads = ifelse(grepl("split", Name), "split", "all"))
     cov <- bind_rows(cov, tmp)
     cli_progress_update()
   }
@@ -36,8 +36,7 @@ if (length(args)==0) {
   
   # Clean up coverage data
   cov <- cov %>%
-    separate(X1, c("Isolate"), sep = "_(?=[^_]+$)", extra = "drop") %>%
-    rename(CHR = X2, POS = X3, Cov = X4)
+    separate(Name, c("Isolate"), sep = "_(?=[^_]+$)", extra = "drop")
 
   cli_alert_info("Creating plots...")
 
