@@ -34,16 +34,21 @@ if (length(args)==0) {
   }
   cli_progress_done()
   
-  # Clean up coverage data
+  # Clean up coverage data and ensure numeric columns
   cov <- cov %>%
-    separate(Name, c("Isolate"), sep = "_(?=[^_]+$)", extra = "drop")
+    separate(Name, c("Isolate"), sep = "_(?=[^_]+$)", extra = "drop") %>%
+    mutate(
+      POS = as.numeric(POS),
+      Cov = as.numeric(Cov)
+    )
 
   cli_alert_info("Creating plots...")
 
   # Create split reads plot with proper layout
   p1 <- cov %>% 
-    filter(grepl("split", Reads)) %>% 
-    plot_ly(x = ~POS, y = ~Cov, color = ~Isolate, type = 'scatter', mode = 'lines', legendgroup = ~Isolate) %>% 
+    filter(Reads == "split") %>% 
+    plot_ly(data = ., x = ~POS, y = ~Cov, color = ~Isolate, 
+            type = 'scatter', mode = 'lines', legendgroup = ~Isolate) %>% 
     add_annotations(
       text = "SPLIT",
       x = 0.5,
@@ -63,8 +68,9 @@ if (length(args)==0) {
 
   # Create all reads plot
   p2 <- cov %>% 
-    filter(grepl("all", Reads)) %>% 
-    plot_ly(x = ~POS, y = ~Cov, color = ~Isolate, type = 'scatter', mode = 'lines', legendgroup = ~Isolate) %>% 
+    filter(Reads == "all") %>% 
+    plot_ly(data = ., x = ~POS, y = ~Cov, color = ~Isolate, 
+            type = 'scatter', mode = 'lines', legendgroup = ~Isolate) %>% 
     add_annotations(
       text = "ALL",
       x = 0.5,
@@ -89,7 +95,8 @@ if (length(args)==0) {
   p4 <- cov %>% 
     pivot_wider(names_from = Reads, values_from = Cov, values_fill = 0) %>% 
     mutate(prop = split/all) %>% 
-    plot_ly(x = ~POS, y = ~prop, color = ~Isolate, type = 'scatter', mode = 'lines', legendgroup = ~Isolate) %>% 
+    plot_ly(data = ., x = ~POS, y = ~prop, color = ~Isolate, 
+            type = 'scatter', mode = 'lines', legendgroup = ~Isolate) %>% 
     add_annotations(
       text = "SPLIT:All",
       x = 0.5,
