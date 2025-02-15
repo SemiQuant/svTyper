@@ -28,12 +28,21 @@ if (length(args)==0) {
   cov <- tibble()
   for(f in files) {
     cli_alert_info(paste("Reading file:", f))
-    tmp <- read_tsv(f, col_names = c("Name", "CHR", "POS", "Cov"), show_col_types = FALSE)
-    print("Raw data from file:")
+    # Read the raw data first
+    tmp <- read_tsv(f, col_names = "raw_data", show_col_types = FALSE)
+    
+    print("Initial raw data:")
     print(head(tmp))
     
-    tmp <- tmp %>% mutate(Reads = ifelse(grepl("split", Name), "split", "all"))
-    print("After adding Reads column:")
+    # Split the single column into proper columns
+    tmp <- tmp %>%
+      separate(raw_data, 
+               into = c("Name", "CHR", "POS", "Cov"),
+               sep = "\\s+",    # Split on whitespace
+               extra = "drop") %>%
+      mutate(Reads = ifelse(grepl("split", Name), "split", "all"))
+    
+    print("After splitting columns:")
     print(head(tmp))
     
     cov <- bind_rows(cov, tmp)
@@ -47,14 +56,7 @@ if (length(args)==0) {
   
   # Clean up coverage data and ensure numeric columns
   cov <- cov %>%
-    separate(Name, c("Isolate"), sep = "_(?=[^_]+$)", extra = "drop")
-  
-    print("After separate:")
-    print(head(cov))
-    print(colnames(cov))
-  
-  # Now convert to numeric
-  cov <- cov %>%
+    separate(Name, c("Isolate"), sep = "_(?=[^_]+$)", extra = "drop") %>%
     mutate(
       POS = as.numeric(as.character(POS)),
       Cov = as.numeric(as.character(Cov))
