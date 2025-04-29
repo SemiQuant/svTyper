@@ -283,6 +283,10 @@ for i in "${!r1_files[@]}"; do
         -c "$chr" -s $((gene_start - 1000)) -e $((gene_end + 1000)) -t "DEL"
 
     echo "Generating dash data for sample: $sample"
+    # Ensure HOME environment variable is set
+    if [ -z "$HOME" ]; then
+        export HOME=$(eval echo ~$USER)
+    fi
     Rscript "${script_dir}/make_dash_data.R" "$Data" $gene_start $gene_end $gene_name "$script_dir"
 
 done
