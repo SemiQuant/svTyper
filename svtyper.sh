@@ -2,7 +2,7 @@
 
 # Check for required tools
 check_tools() {
-    for tool in bwa samtools gridss Rscript; do
+    for tool in bwa samtools gridss Rscript samplot; do
         if ! command -v "$tool" &> /dev/null; then
             echo "Error: $tool is not installed or not in PATH."
             exit 1
@@ -277,7 +277,10 @@ for i in "${!r1_files[@]}"; do
         -t $threads \
         "$bam"
 
-
+    # Generate samplot visualization
+    echo "Generating samplot visualization for sample: $sample"
+    samplot plot -n "$sample" -b "$bam" -o "${Data}/${sample}_region.png" \
+        -c "$chr" -s $((gene_start - 1000)) -e $((gene_end + 1000)) -t "DEL"
 
     echo "Generating dash data for sample: $sample"
     Rscript "${script_dir}/make_dash_data.R" "$Data" $gene_start $gene_end $gene_name "$script_dir"
