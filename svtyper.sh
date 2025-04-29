@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Set Java environment
+if [ -d "$HOME/miniconda3" ]; then
+    export JAVA_HOME="$HOME/miniconda3/lib/jvm"
+    export PATH="$JAVA_HOME/bin:$PATH"
+    # Ensure proper Java library path
+    export LD_LIBRARY_PATH="$JAVA_HOME/lib:$JAVA_HOME/lib/server:$LD_LIBRARY_PATH"
+fi
+
 # Check for required tools
 check_tools() {
     for tool in bwa samtools gridss Rscript samplot; do
@@ -8,6 +16,14 @@ check_tools() {
             exit 1
         fi
     done
+    
+    # Verify R packages
+    Rscript -e 'if(!all(c("rmarkdown", "knitr", "plotly", "tidyverse", "RColorBrewer", "vcfR") %in% installed.packages()[,"Package"])) { quit(status=1) }'
+    if [ $? -ne 0 ]; then
+        echo "Error: Required R packages are missing. Please install them using:"
+        echo "R -e 'install.packages(c(\"rmarkdown\", \"knitr\", \"plotly\", \"tidyverse\", \"RColorBrewer\", \"vcfR\"))'"
+        exit 1
+    fi
 }
 
 # Default values
@@ -280,7 +296,7 @@ for i in "${!r1_files[@]}"; do
     # Generate samplot visualization
     echo "Generating samplot visualization for sample: $sample"
     samplot plot -n "$sample" -b "$bam" -o "${Data}/${sample}_region.png" \
-        -c "$chr" -s $((gene_start - 1000)) -e $((gene_end + 1000)) -t "DEL"
+        -c "$chr" -s $((gene_start - 1000)) -e $((gene_end + 1000)) -t "ROI"
 
     echo "Generating dash data for sample: $sample"
     # Ensure HOME environment variable is set
@@ -288,7 +304,7 @@ for i in "${!r1_files[@]}"; do
         export HOME=$(eval echo ~$USER)
     fi
     Rscript "${script_dir}/make_dash_data.R" "$Data" $gene_start $gene_end $gene_name "$script_dir"
-
+    rm "$R1" "$R2"
 done
 
 echo "Script execution completed."
